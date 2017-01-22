@@ -3,7 +3,10 @@
 #include <QDebug>
 #include <QOpenGLShaderProgram>
 #include <cstring>
-
+VentanaVisualizacion::~VentanaVisualizacion(){
+    makeCurrent();
+    vertices.finishGL(*this);
+}
 
 VentanaVisualizacion::VentanaVisualizacion(QWidget* parent)
     :QOpenGLWidget(parent)
@@ -11,7 +14,7 @@ VentanaVisualizacion::VentanaVisualizacion(QWidget* parent)
 
     qsrand(QTime::currentTime().msec());
 
-    const int numeroDatosPrueba = 1024;
+    const int numeroDatosPrueba = 8192;
     vertices.reserveForAtLeastNVertexs( numeroDatosPrueba );
 
 
@@ -92,11 +95,6 @@ void VentanaVisualizacion::initializeGL(){
         return;
     }
     #endif //QT_DEBUG
-//    std::memcpy(
-//        vertices.vertices.data(),
-//        muestras.data(),
-//        muestras.size()*sizeof(GLushort)
-//    );
 
     shader->bind();
     shader->setAttributeBuffer( "vertex", GL_UNSIGNED_SHORT, 0, 1 );

@@ -19,6 +19,7 @@ public:
 
 public:
     VentanaVisualizacion(QWidget* parent = nullptr);
+    ~VentanaVisualizacion();
 
 protected:
     virtual void initializeGL();

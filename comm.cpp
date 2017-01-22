@@ -24,8 +24,7 @@ void VistaOsciloscopio::prepararSocket(){
 
 }
 
-
-constexpr int nMuestrasAMostrar = 2048;
+constexpr int nMuestrasAMostrar = 512;
 
 void VistaOsciloscopio::hayDatosLecturaPendientes(){
     if(socket==nullptr){
@@ -44,6 +43,7 @@ void VistaOsciloscopio::hayDatosLecturaPendientes(){
             }
             //socket->readDatagram(nullptr, numeroDatosALeer, nullptr, nullptr);
             socket->readDatagram((char*)bufferLectura.data(), numeroDatosALeer, nullptr, nullptr);
+            //socket->readDatagram((char*)bufferLectura.data(), 0, nullptr, nullptr);
             muestrasCapturadas = 0;
             continue;
         }
@@ -71,9 +71,8 @@ void VistaOsciloscopio::hayDatosLecturaPendientes(){
         if(nuevoContador!=(ultimoPaqueteValido+1)){
             //Desincronizado
             muestrasCapturadas = 0;
-            //qDebug()<<"unsync";
             ultimoPaqueteValido = nuevoContador;
-            return;
+            //continue;
         }
         ultimoPaqueteValido = nuevoContador;
         if(muetrasAMostrar.size()<nMuestrasAMostrar){
@@ -95,7 +94,7 @@ void VistaOsciloscopio::hayDatosLecturaPendientes(){
         muestrasCapturadas+=nMuestrasAdjuntar;
         if(muestrasCapturadas>=nMuestrasAMostrar){
             if(ventana->vertices.vertices.size()<nMuestrasAMostrar){
-                ventana->vertices.vertices.resize(nMuestrasAMostrar);
+                ventana->vertices.reserveForAtLeastNVertexs(nMuestrasAMostrar);
             }
             memcpy(
                 (char*)ventana->vertices.vertices.data(),
@@ -104,7 +103,7 @@ void VistaOsciloscopio::hayDatosLecturaPendientes(){
             );
             muestrasCapturadas = 0;
             ultimoTiempoDeCaptura = QDateTime::currentMSecsSinceEpoch();
-            return;
+            continue;
         }
 
 

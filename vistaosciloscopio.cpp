@@ -53,6 +53,8 @@ VistaOsciloscopio::VistaOsciloscopio(
 
 VistaOsciloscopio::~VistaOsciloscopio()
 {
+
+
     delete ui;
 }
 
