@@ -24,31 +24,90 @@ void VistaOsciloscopio::prepararSocket(){
 
 }
 
+
+constexpr int nMuestrasAMostrar = 2048;
+
 void VistaOsciloscopio::hayDatosLecturaPendientes(){
     if(socket==nullptr){
         return;
     }
+    bool seDebeActualizar = debeActualizar();
     while(socket->hasPendingDatagrams()){
         int numeroDatosALeer = socket->pendingDatagramSize();
-        if((numeroDatosALeer%2)!=0){
-            QByteArray datosAIgnorar;
-            datosAIgnorar.resize(numeroDatosALeer);
-            socket->read(datosAIgnorar.data(), numeroDatosALeer);
+        //Ignorar apquetses que no tienen la longitud adecuada
+        if(
+            ((numeroDatosALeer%2)!=0) ||
+            (!seDebeActualizar)
+        ){
+            if(bufferLectura.size()<numeroDatosALeer){
+                bufferLectura.resize(numeroDatosALeer);
+            }
+            //socket->readDatagram(nullptr, numeroDatosALeer, nullptr, nullptr);
+            socket->readDatagram((char*)bufferLectura.data(), numeroDatosALeer, nullptr, nullptr);
+            muestrasCapturadas = 0;
+            continue;
         }
-        auto nMuestras = numeroDatosALeer/2;
-        ventana->vertices.resizeForNVertexs(nMuestras);
-        QHostAddress sender;
-        quint16 senderPort;
+        auto nMuestrasRecibidas = (numeroDatosALeer-4)/2;
+        //QHostAddress sender;
+        //quint16 senderPort;
+//        auto valorRetRed = socket->readDatagram(
+//            (char*)bufferLectura.data(),
+//            numeroDatosALeer,
+//            &sender, &senderPort
+//        );
         auto valorRetRed = socket->readDatagram(
-            (char*)ventana->vertices.vertices.data(),
+            (char*)bufferLectura.data(),
             numeroDatosALeer,
-            &sender, &senderPort
+            nullptr, nullptr
         );
-        //update();
         if(valorRetRed<=0){
             #ifdef QT_DEBUG
             qDebug()<<"Error leyendo datos UDP";
             #endif //QT_DEBUG
+            continue;
         }
+        //update();
+        std::uint32_t nuevoContador = *((std::uint32_t*)bufferLectura.data());
+        if(nuevoContador!=(ultimoPaqueteValido+1)){
+            //Desincronizado
+            muestrasCapturadas = 0;
+            //qDebug()<<"unsync";
+            ultimoPaqueteValido = nuevoContador;
+            return;
+        }
+        ultimoPaqueteValido = nuevoContador;
+        if(muetrasAMostrar.size()<nMuestrasAMostrar){
+            muetrasAMostrar.resize(nMuestrasAMostrar);
+        }
+        int nMuestrasRestantes = std::max(
+            nMuestrasAMostrar-muestrasCapturadas,
+            0
+        );
+        int nMuestrasAdjuntar = std::min(
+            nMuestrasRecibidas,
+            nMuestrasRestantes
+        );
+        memcpy(
+            muetrasAMostrar.data()+sizeof(std::uint16_t)*muestrasCapturadas,
+            bufferLectura.data()+sizeof(std::uint32_t),
+            nMuestrasAdjuntar*sizeof(std::uint16_t)
+        );
+        muestrasCapturadas+=nMuestrasAdjuntar;
+        if(muestrasCapturadas>=nMuestrasAMostrar){
+            if(ventana->vertices.vertices.size()<nMuestrasAMostrar){
+                ventana->vertices.vertices.resize(nMuestrasAMostrar);
+            }
+            memcpy(
+                (char*)ventana->vertices.vertices.data(),
+                muetrasAMostrar.data(),
+                nMuestrasAMostrar*sizeof(std::uint16_t)
+            );
+            muestrasCapturadas = 0;
+            ultimoTiempoDeCaptura = QDateTime::currentMSecsSinceEpoch();
+            return;
+        }
+
+
+
     }
 }

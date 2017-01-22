@@ -47,6 +47,8 @@ VistaOsciloscopio::VistaOsciloscopio(
     ly->addWidget(ventana);
     ui->vistaOSC->setLayout(ly);
 
+    bufferLectura.resize(2048);
+    muestrasCapturadas = 0;
 }
 
 VistaOsciloscopio::~VistaOsciloscopio()

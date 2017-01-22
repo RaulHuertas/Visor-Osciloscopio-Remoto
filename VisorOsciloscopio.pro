@@ -64,3 +64,6 @@ HEADERS  += \
 FORMS    += mainwindow.ui \
     vistaosciloscopio.ui \
     configuraacionred.ui
+
+RESOURCES += \
+    recursos.qrc

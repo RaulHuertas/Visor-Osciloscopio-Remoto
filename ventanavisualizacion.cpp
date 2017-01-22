@@ -16,7 +16,7 @@ VentanaVisualizacion::VentanaVisualizacion(QWidget* parent)
 
 
     for(auto& muestra: vertices.vertices){
-        muestra = qrand()%65536U;
+        muestra = qrand()%(1<<12);
     }
     timerAnimacion.setInterval(16);
     timerAnimacion.setSingleShot(false);
@@ -72,7 +72,12 @@ void VentanaVisualizacion::initializeGL(){
     qDebug() << "                    RENDERDER:    " << (const char*)glGetString(GL_RENDERER);
     qDebug() << "                    VERSION:      " << (const char*)glGetString(GL_VERSION);
     qDebug() << "                    GLSL VERSION: " << (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
-    shader = cargarShader("scope.vs", "scope.gs", "scope.fs", this);
+    shader = cargarShader(
+        ":/shaders/scope.vs",
+        ":/shaders/scope.gs",
+        ":/shaders/scope.fs",
+        this
+    );
     if(shader==nullptr){
         return;
     }

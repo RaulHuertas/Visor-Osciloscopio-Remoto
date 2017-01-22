@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
     auto settings = std::make_shared<QSettings>(OrgName, AppName);
     auto osc = std::make_unique<VistaOsciloscopio>(settings);
-    osc->showFullScreen();
+    osc->show();
 
 
 

@@ -6,6 +6,7 @@
 #include <QSettings>
 #include "configuraacionred.hpp"
 #include <QUdpSocket>
+#include <QDateTime>
 
 class VentanaVisualizacion;
 namespace Ui {
@@ -49,6 +50,21 @@ private:
     private:
         std::unique_ptr<QUdpSocket> socket = nullptr;
         void prepararSocket();
+
+        std::vector<std::uint16_t> muetrasAMostrar;
+        std::vector<std::uint8_t> bufferLectura;
+        std::uint32_t ultimoPaqueteValido = 0;
+        std::uint32_t paqueteInicialVentanaActual = 0;
+
+        int muestrasCapturadas  = 0;
+        std::uint64_t ultimoTiempoDeCaptura = 0;
+
+        bool debeActualizar()const{
+            auto tiempoActual = QDateTime::currentMSecsSinceEpoch();
+            return ((tiempoActual-ultimoTiempoDeCaptura)>(16));
+        }
+
+
     public slots:
         void hayDatosLecturaPendientes();
 };

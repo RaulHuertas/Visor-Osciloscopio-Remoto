@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/shaders">
+        <file>scope.fs</file>
+        <file>scope.gs</file>
+        <file>scope.vs</file>
+    </qresource>
+</RCC>
